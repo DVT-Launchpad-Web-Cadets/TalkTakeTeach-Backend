@@ -1,4 +1,4 @@
 # TalkTakeTeach-Backend
 
-## Installation
+## Bun Installation
 https://elysiajs.com/quick-start.html
