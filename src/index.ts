@@ -1,13 +1,10 @@
-import { Elysia } from "elysia";
-import { searchController } from "./controllers/searchController";
-import { chatController } from "./controllers/chatController";
+import { PrismaClient } from "@prisma/client";
+import { Elysia, t } from "elysia";
+import chatController from "./controllers/chatController";
 
-const app = new Elysia();
+const db = new PrismaClient();
 
-app.use(searchController);
-app.use(chatController);
-
-app.listen(3000);
+const app = new Elysia().use(chatController).get("/", () => "Hello Elysia").listen(3000);
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
