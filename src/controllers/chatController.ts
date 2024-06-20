@@ -1,6 +1,6 @@
 // import { PrismaClient } from '@prisma/client'
 import { Elysia, t } from "elysia";
-import db from "../dbconnecr";
+import db from "../dbConnect";
 
 const chatController = new Elysia().group(
   "chat",
