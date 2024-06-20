@@ -1,34 +1,49 @@
-import { PrismaClient } from '@prisma/client'
-import { Elysia, t } from 'elysia'
+// import { PrismaClient } from '@prisma/client'
+import { Elysia, t } from "elysia";
+import db from "../dbconnecr";
 
-const db = new PrismaClient()
-const chatController = new Elysia()
-    .group(
-        'chat', 
-        
-        (app) => app
-        .get('/',
-            async ({error}) => await db.messageModel.findMany().catch(() => {
-                return error(500, "Internal Server Error - Database Error")
+const chatController = new Elysia().group(
+  "chat",
+
+  (app) =>
+    app
+      .get(
+        "/",
+        async ({ error }) =>
+          await db.messageModel.findMany().catch(() => {
+            return error(500, "Internal Server Error - Database Error");
+          })
+      )
+      .post(
+        "/",
+        async ({ body, error }) =>
+          db.messageModel
+            .create({
+              data: body,
             })
-        ).post('/', 
-            async ({ body, error }) => db.messageModel.create({
-                data: body
-            }).catch((er) => {
-                if (er.toString().includes(`Duplicate message_id detected: ${body.message_id}`)) {
-                    return error(409, `Duplicate message_id detected: ${body.message_id}`)
-                }
-                return error(500, "Internal Server Error - Database Error")
-            }), { 
-                body: t.Object({ 
-                    message_id: t.String({maxLength: 36, minLength: 36}), 
-                    message_text: t.String({ 
-                        maxLength: 120 
-                    }),
-                    timestamp_sent: t.Date()
-                })
-            },
-        )
-    )
+            .catch((er: Error) => {
+              if (
+                er
+                  .toString()
+                  .includes(`Duplicate message_id detected: ${body.message_id}`)
+              ) {
+                return error(
+                  409,
+                  `Duplicate message_id detected: ${body.message_id}`
+                );
+              }
+              return error(500, "Internal Server Error - Database Error");
+            }),
+        {
+          body: t.Object({
+            message_id: t.String({ maxLength: 36, minLength: 36 }),
+            message_text: t.String({
+              maxLength: 120,
+            }),
+            timestamp_sent: t.Date(),
+          }),
+        }
+      )
+);
 
-export default chatController
+export default chatController;
