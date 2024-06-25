@@ -10,6 +10,7 @@ export interface IUser {
 export interface IMessage {
   text: string;
   username: string | undefined;
+  timestamp: number;
 }
 
 const messages: IMessage[] = [];
@@ -27,6 +28,7 @@ const app = new Elysia()
       const joinedNotification: IMessage = {
         text: `${username} has joined the chat`,
         username: undefined,
+        timestamp: Date.now(),
       };
       messages.push(joinedNotification);
 
@@ -50,6 +52,7 @@ const app = new Elysia()
       const message = data as IMessage;
 
       message.username = `user_${ws.id}`;
+      message.timestamp = Date.now();
       messages.push(message);
 
       app.server?.publish(
@@ -64,6 +67,7 @@ const app = new Elysia()
       const leftNotification: IMessage = {
         text: `${username} has left the chat`,
         username: undefined,
+        timestamp: Date.now(),
       };
       messages.push(leftNotification);
 
