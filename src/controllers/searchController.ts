@@ -4,7 +4,7 @@ import { Product, Result } from "./models/elastic";
 
 const searchController = new Elysia({ prefix: "/search" })
   .get(
-    "/",
+    "",
     async ({ query: { q } }) => {
       try {
         console.log(q);
@@ -72,7 +72,6 @@ const searchController = new Elysia({ prefix: "/search" })
       }),
     }
   )
-  .get("/search/products", () => {})
   .onError(({ code, error }) => {
     switch (code) {
       case "VALIDATION":

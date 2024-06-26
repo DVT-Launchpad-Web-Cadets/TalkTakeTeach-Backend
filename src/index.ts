@@ -4,10 +4,18 @@ import searchController from "./controllers/searchController";
 import { swagger } from "@elysiajs/swagger";
 
 const app = new Elysia()
-  .use(swagger())
+  .use(
+    swagger({
+      documentation: {
+        info: {
+          title: "TTT-BFF",
+          version: "1.0.0",
+        },
+      },
+    })
+  )
   .use(chatController)
   .use(searchController)
-  .get("/", () => "Hello Elysia")
   .listen(process.env["PORT"] || 3000);
 
 console.log(
