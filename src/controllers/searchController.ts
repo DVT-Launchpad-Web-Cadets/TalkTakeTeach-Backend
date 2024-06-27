@@ -43,8 +43,6 @@ const searchController = new Elysia({ prefix: "/search" })
           )
             .then((resp) => resp.json())
             .then((res: Result) => {
-              console.log(res);
-
               const results: Product[] = [];
               for (const option of res?.suggest?.["product-suggest-fuzzy"]?.[0]
                 .options) {
