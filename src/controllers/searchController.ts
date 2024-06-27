@@ -7,8 +7,6 @@ const searchController = new Elysia({ prefix: "/search" })
     "",
     async ({ query: { q } }) => {
       try {
-        console.log(q);
-
         if (q.length) {
           const payload = {
             suggest: {
