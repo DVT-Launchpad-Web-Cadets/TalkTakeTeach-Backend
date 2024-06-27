@@ -5,5 +5,4 @@
 
 */
 -- AlterTable
-ALTER TABLE "tbchat" ADD COLUMN     "session_state" VARCHAR(20) NOT NULL DEFAULT 'active',
-ADD COLUMN     "user_alias" VARCHAR(20) NOT NULL;
+ALTER TABLE "tbchat" ADD COLUMN     "session_state" VARCHAR(20) NOT NULL DEFAULT 'active'
