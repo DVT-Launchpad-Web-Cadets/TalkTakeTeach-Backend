@@ -44,5 +44,5 @@ export interface Percolation {
   
   export interface PName {
     input: string[]
-  }P
+  }
   

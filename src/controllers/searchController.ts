@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import base64 from "base-64";
-import { Product, Result } from "./models/searchResult";
-import { Percolation } from "./models/percolation";
+import { Product, Result } from "../models/searchResult";
+import { Percolation } from "../models/percolation";
 
 const searchController = new Elysia({ prefix: "/search" })
   .get(
