@@ -47,8 +47,15 @@ const searchController = new Elysia({ prefix: "/search" })
               for (const option of res?.suggest?.["product-suggest-fuzzy"]?.[0]
                 .options) {
                 const product = {
-                  ...option?._source,
                   name: option?._source?.name?.input[0],
+                  price: option?._source?.price,
+                  imageUrl: option?._source?.imageUrl,
+                  productLink: option?._source?.productLink,
+                  brand: option?._source?.brand,
+                  brandLink: option?._source?.brandLink,
+                  numberOfReviews: option?._source?.numberOfReviews,
+                  rating: option?._source?.rating,
+                  salePrice: option?._source?.salePrice,
                 };
                 results.push(product);
               }
@@ -87,9 +94,16 @@ const searchController = new Elysia({ prefix: "/search" })
             .then((res: Percolation) => {
               const results: Product[] = [];
               for (const hit of res?.hits?.hits) {
-                const product = {
-                  ...hit._source,
+                const product: Product = {
                   name: hit?._source?.name?.input[0],
+                  price: hit?._source?.price,
+                  imageUrl: hit?._source?.imageUrl,
+                  productLink: hit?._source?.productLink,
+                  brand: hit?._source?.brand,
+                  brandLink: hit?._source?.brandLink,
+                  numberOfReviews: hit?._source?.numberOfReviews,
+                  rating: hit?._source?.rating,
+                  salePrice: hit?._source?.salePrice,
                 };
                 results.push(product);
               }

@@ -1,41 +1,48 @@
 export interface Percolation {
     took: number
     timed_out: boolean
-    _shards: Shards
-    hits: Hits
+    _shards: PShards
+    hits: PHits
   }
   
-  export interface Shards {
+  export interface PShards {
     total: number
     successful: number
     skipped: number
     failed: number
   }
   
-  export interface Hits {
-    total: Total
+  export interface PHits {
+    total: PTotal
     max_score: number
-    hits: Hit[]
+    hits: PHit[]
   }
   
-  export interface Total {
+  export interface PTotal {
     value: number
     relation: string
   }
   
-  export interface Hit {
+  export interface PHit {
     _index: string
     _id: string
     _score: number
-    _source: Source
+    _source: PSource
   }
   
-  export interface Source {
-    name: Name
-    price: number
+  export interface PSource {
+    name: PName;
+    imageUrl: string;
+    brand?: string;
+    brandLink?: string;
+    productLink: string;
+    rating?: number;
+    numberOfReviews?: number;
+    price: number;
+    salePrice?: number;
   }
   
-  export interface Name {
+  export interface PName {
     input: string[]
-  }
+  }P
   

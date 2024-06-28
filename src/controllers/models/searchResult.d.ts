@@ -47,7 +47,14 @@ export interface Option {
 
 export interface Source {
   name: Name;
+  imageUrl: string;
+  brand?: string;
+  brandLink?: string;
+  productLink: string;
+  rating?: number;
+  numberOfReviews?: number;
   price: number;
+  salePrice?: number;
 }
 
 export interface Name {
@@ -56,5 +63,12 @@ export interface Name {
 
 export interface Product {
   name: string;
-  price: integer;
+  imageUrl: string;
+  brand?: string;
+  brandLink?: string;
+  productLink: string;
+  rating?: number;
+  numberOfReviews?: number;
+  price: number;
+  salePrice?: number;
 }
