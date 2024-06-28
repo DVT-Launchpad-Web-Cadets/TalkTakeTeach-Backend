@@ -1,10 +1,10 @@
-// import { PrismaClient } from '@prisma/client'
 import { Elysia, t } from "elysia";
 import db from "../dbConnect";
 import {
   chatDisconnectPATCHRequest,
   chatNewMessagePOSTRequest,
 } from "../utils/chatBodyPayloads";
+import { WebSocket } from "ws";
 
 const chatController = new Elysia().group(
   "chat",
@@ -27,15 +27,24 @@ const chatController = new Elysia().group(
       .post(
         "/",
         async ({ body, error }) => {
+          const wss = new WebSocket("ws://localhost:3000/chat");
+          
           body.userId = crypto.randomUUID();
           return await db.messageModel
             .create({
               data: body,
             })
+            .then(() => {
+              if (wss.OPEN) wss.send(JSON.stringify(body));
+              else throw Error("Message failed to send");
+            })
             .catch((er: Error) => {
               console.error(er);
 
               return error(500, `Internal Server Error ${er.message}`);
+            })
+            .finally(() => {
+              wss.close();
             });
         },
         { body: chatNewMessagePOSTRequest.body }

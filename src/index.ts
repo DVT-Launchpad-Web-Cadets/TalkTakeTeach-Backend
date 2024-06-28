@@ -1,7 +1,7 @@
-import { Context, Elysia } from "elysia";
+import { Elysia } from "elysia";
 import chatController from "./controllers/chatController";
 import searchController from "./controllers/searchController";
-import { ServerWebSocket } from "bun";
+import { cors } from "@elysiajs/cors";
 
 export interface IUser {
   username: string;
@@ -17,6 +17,7 @@ const messages: IMessage[] = [];
 let users: String[] = [];
 
 const app = new Elysia()
+  .use(cors())
   .use(chatController)
   .use(searchController)
   .get("/", () => "Hello Elysia")
@@ -24,7 +25,6 @@ const app = new Elysia()
     transform() {},
     open(ws) {
       const username = `user_${ws.id}`; //TODO: replace with db user logic - once I understand it
-      users.push(username);
       const joinedNotification: IMessage = {
         text: `${username} has joined the chat`,
         username: undefined,
@@ -34,19 +34,8 @@ const app = new Elysia()
 
       ws.subscribe("chat");
 
-      app.server?.publish(
-        "chat",
-        JSON.stringify({ type: "USERS_ADD", data: username })
-      );
-      app.server?.publish(
-        "chat",
-        JSON.stringify({ type: "MESSAGES_ADD", data: joinedNotification })
-      );
-
       // Send message to the newly connected client containing existing users and messages
       // TODO: replace with db logic - once I understand it
-      ws.send(JSON.stringify({ type: "USERS_SET", data: users }));
-      ws.send(JSON.stringify({ type: "MESSAGES_SET", data: messages }));
     },
     message(ws, data) {
       const message = data as IMessage;
