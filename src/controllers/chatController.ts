@@ -37,8 +37,6 @@ const chatController = new Elysia().group(
               else throw Error("Message failed to send");
             })
             .catch((er: Error) => {
-              console.error(er);
-
               return error(500, `Internal Server Error ${er.message}`);
             })
             .finally(() => {
