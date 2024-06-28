@@ -1,9 +1,6 @@
 import { Elysia, t } from "elysia";
 import db from "../dbConnect";
-import {
-  chatDisconnectPATCHRequest,
-  chatNewMessagePOSTRequest,
-} from "../utils/chatBodyPayloads";
+import { chatNewMessagePOSTRequest } from "../utils/chatBodyPayloads";
 import { WebSocket } from "ws";
 
 const chatController = new Elysia().group(
@@ -27,7 +24,9 @@ const chatController = new Elysia().group(
       .post(
         "/",
         async ({ body, error }) => {
-          const wss = new WebSocket("ws://localhost:3000/chat");
+          const wss = new WebSocket(
+            `${process.env.WEBSOCKET_URL ?? "ws://localhost:3000/chat"}`
+          );
 
           return await db.messageModel
             .create({
@@ -47,20 +46,6 @@ const chatController = new Elysia().group(
             });
         },
         { body: chatNewMessagePOSTRequest.body }
-      )
-      .patch(
-        "disconnect",
-        async ({ body, error }) => {
-          return await db.messageModel
-            .update({
-              where: { userId: body.user_id },
-              data: { sessionState: "inactive" },
-            })
-            .catch(() => {
-              return error(500, "Internal Server Error - Database Error");
-            });
-        },
-        { body: chatDisconnectPATCHRequest.body }
       )
 );
 
