@@ -9,7 +9,6 @@
     "@prisma/client": "^5.16.0",
     "@elastic/elasticsearch": "^8.14.0",
     "@elysiajs/swagger": "^1.0.5",
-    "@prisma/client": "^5.15.0",
     "base-64": "^1.0.0",
     "elysia": "latest"
   },
