@@ -15,8 +15,9 @@ datasource db {
 
 model messageModel {
   id        Int     @id @default(autoincrement())
-  message_text  String  @db.VarChar(120)
-  message_id  String @unique @db.Char(36)
-  timestamp_sent DateTime @db.Timestamp()
+  messageText  String  @db.VarChar(120)
+  userId  String @unique @db.Char(36)
+  timestampSent Int 
+  sessionState String @default("active") @db.VarChar(20)
   @@map("tbchat")
 }
