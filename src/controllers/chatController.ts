@@ -28,8 +28,7 @@ const chatController = new Elysia().group(
         "/",
         async ({ body, error }) => {
           const wss = new WebSocket("ws://localhost:3000/chat");
-          
-          body.userId = crypto.randomUUID();
+
           return await db.messageModel
             .create({
               data: body,
