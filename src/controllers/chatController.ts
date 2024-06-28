@@ -1,6 +1,10 @@
 // import { PrismaClient } from '@prisma/client'
 import { Elysia, t } from "elysia";
 import db from "../dbConnect";
+import {
+  chatDisconnectPATCHRequest,
+  chatNewMessagePOSTRequest,
+} from "../utils/chatBodyPayloads";
 
 const chatController = new Elysia().group(
   "chat",
@@ -9,40 +13,46 @@ const chatController = new Elysia().group(
     app
       .get(
         "/",
-        async ({ error }) =>
-          await db.messageModel.findMany().catch(() => {
+        async ({ error }) => {
+          return await db.messageModel.findMany().catch(() => {
             return error(500, "Internal Server Error - Database Error");
-          })
+          });
+        },
+        {
+          query: t.Object({
+            alias_exists: t.Optional(t.String()),
+          }),
+        }
       )
       .post(
         "/",
-        async ({ body, error }) =>
-          db.messageModel
+        async ({ body, error }) => {
+          body.userId = crypto.randomUUID();
+          return await db.messageModel
             .create({
               data: body,
             })
             .catch((er: Error) => {
-              if (
-                er
-                  .toString()
-                  .includes(`Duplicate message_id detected: ${body.message_id}`)
-              ) {
-                return error(
-                  409,
-                  `Duplicate message_id detected: ${body.message_id}`
-                );
-              }
+              console.error(er);
+
+              return error(500, `Internal Server Error ${er.message}`);
+            });
+        },
+        { body: chatNewMessagePOSTRequest.body }
+      )
+      .patch(
+        "disconnect",
+        async ({ body, error }) => {
+          return await db.messageModel
+            .update({
+              where: { userId: body.user_id },
+              data: { sessionState: "inactive" },
+            })
+            .catch(() => {
               return error(500, "Internal Server Error - Database Error");
-            }),
-        {
-          body: t.Object({
-            message_id: t.String({ maxLength: 36, minLength: 36 }),
-            message_text: t.String({
-              maxLength: 120,
-            }),
-            timestamp_sent: t.Date(),
-          }),
-        }
+            });
+        },
+        { body: chatDisconnectPATCHRequest.body }
       )
 );
 
