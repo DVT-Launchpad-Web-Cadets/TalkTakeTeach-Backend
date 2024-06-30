@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import chatController from "./controllers/chatController";
 import searchController from "./controllers/searchController";
 import { cors } from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
 
 export interface IUser {
   username: string;
@@ -15,7 +16,6 @@ export interface IMessage {
 
 const messages: IMessage[] = [];
 let users: String[] = [];
-import { swagger } from "@elysiajs/swagger";
 
 const app = new Elysia()
   .use(cors())
@@ -31,7 +31,6 @@ const app = new Elysia()
   )
   .use(chatController)
   .use(searchController)
-  .get("/", () => "Hello Elysia")
   .ws("/chat", {
     transform() {},
     open(ws) {
@@ -83,7 +82,6 @@ const app = new Elysia()
     },
   })
   .listen(process.env["PORT"] ?? 3000);
-  .listen(process.env["PORT"] || 3000);
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
