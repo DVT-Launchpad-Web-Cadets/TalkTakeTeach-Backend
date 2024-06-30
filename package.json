@@ -8,11 +8,16 @@
   "dependencies": {
     "@elysiajs/cors": "^1.0.2",
     "@prisma/client": "^5.16.0",
+    "@elastic/elasticsearch": "^8.14.0",
+    "@elysiajs/swagger": "^1.0.5",
+    "base-64": "^1.0.0",
     "elysia": "latest"
   },
   "devDependencies": {
+    "@types/base-64": "^1.0.2",
     "bun-types": "latest",
     "prisma": "^5.16.0"
   },
   "module": "src/index.js"
 }
+

@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import chatController from "./controllers/chatController";
 import searchController from "./controllers/searchController";
 import { cors } from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
 
 export interface IUser {
   username: string;
@@ -18,9 +19,18 @@ let users: String[] = [];
 
 const app = new Elysia()
   .use(cors())
+  .use(
+    swagger({
+      documentation: {
+        info: {
+          title: "TTT-BFF",
+          version: "1.0.0",
+        },
+      },
+    })
+  )
   .use(chatController)
   .use(searchController)
-  .get("/", () => "Hello Elysia")
   .ws("/chat", {
     transform() {},
     open(ws) {
