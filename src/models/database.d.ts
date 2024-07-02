@@ -4,6 +4,7 @@ import {
     JSONColumnType,
     Selectable,
     Updateable,
+
   } from 'kysely'
   
   export interface Database {
@@ -12,11 +13,10 @@ import {
   
   export interface ChatTable {
     id: Generated<number>
-  
     messageText: string
-    userId: 'man' | 'woman' | 'other'
-    timestamp_sent: Date = new Date()
-    session_state: 'active' | 'inactive'
+    userId: string 
+    timestampSent: Date = new Date()
+    sessionState: string
   }
 
   export type Chat = Selectable<PersonTable>
