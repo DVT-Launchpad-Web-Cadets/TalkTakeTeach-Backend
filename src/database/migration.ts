@@ -2,6 +2,7 @@ import { Kysely, sql } from 'kysely'
 import { Database } from '../models/database'
 
 export async function up(db: Kysely<Database>): Promise<void> {
+    console.log('Creating tbchat table')
   await db.schema
     .createTable('tbchat')
     .addColumn('id', 'serial', (col) => col.primaryKey())
