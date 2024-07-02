@@ -7,7 +7,7 @@ export const dialect = new PostgresDialect({
     database: process.env.DB,
     host: process.env.DATABASE_URL || 'localhost',
     user: process.env.DATABASE_USER,
-    port: 5434,
+    port: 5432,
     max: 10,
   })
 })
