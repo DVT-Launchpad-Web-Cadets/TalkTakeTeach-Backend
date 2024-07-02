@@ -1,6 +1,5 @@
 import { Elysia, t } from "elysia";
 import { db } from '../dbConnect'
-import { ChatUpdate, Chat, NewChat } from '../models/database'
 import { chatNewMessagePOSTRequest } from "../utils/chatBodyPayloads";
 import { WebSocket } from "ws";
 

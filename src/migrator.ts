@@ -10,7 +10,7 @@ async function migrateToLatest() {
       provider: new FileMigrationProvider({
         fs,
         path,
-        migrationFolder: '/database',
+        migrationFolder: path.join(__dirname, 'database'),
       }),
     })
     const { error, results } = await migrator.migrateToLatest()
