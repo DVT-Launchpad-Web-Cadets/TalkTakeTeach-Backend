@@ -17,7 +17,8 @@
   },
   "devDependencies": {
     "@types/base-64": "^1.0.2",
-    "bun-types": "latest"
+    "bun-types": "latest",
+    "kysely-ctl": "^0.8.9"
   },
   "module": "src/index.js"
 }
