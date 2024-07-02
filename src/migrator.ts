@@ -1,6 +1,4 @@
-import { Kysely, PostgresDialect, Migrator, FileMigrationProvider } from "kysely"
-import { Pool } from "pg"
-import { Database } from "./models/database"
+import { Migrator, FileMigrationProvider } from "kysely"
 import * as path from 'path'
 import { promises as fs } from 'fs'
 import { db } from "./dbConnect"
