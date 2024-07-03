@@ -60,7 +60,6 @@ const searchController = new Elysia({ prefix: "/search" })
                 };
                 results.push(product);
               }
-              fetch(`${process.env.ELASTIC_URL}/percolator/_doc`);
               return results;
             })
             .catch((err) => {
@@ -109,7 +108,6 @@ const searchController = new Elysia({ prefix: "/search" })
                 };
                 results.push(product);
               }
-              fetch(`${process.env.ELASTIC_URL}/percolator/_doc`);
               return results;
             })
             .catch((err) => {
