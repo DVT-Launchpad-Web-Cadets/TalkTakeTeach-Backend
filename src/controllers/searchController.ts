@@ -16,7 +16,7 @@ const searchController = new Elysia({ prefix: "/search" })
                 completion: {
                   field: "name",
                   fuzzy: {
-                    fuzziness: 1,
+                    fuzziness: "AUTO",
                   },
                 },
               },
@@ -45,8 +45,9 @@ const searchController = new Elysia({ prefix: "/search" })
             .then((res: Result) => {
               const results: Product[] = [];
               for (const option of res?.suggest?.["product-suggest-fuzzy"]?.[0]
-                .options) {
+                ?.options) {
                 const product = {
+                  id: option?._id,
                   name: option?._source?.name?.input[0],
                   price: option?._source?.price,
                   imageUrl: option?._source?.imageUrl,
@@ -59,7 +60,6 @@ const searchController = new Elysia({ prefix: "/search" })
                 };
                 results.push(product);
               }
-              fetch(`${process.env.ELASTIC_URL}/percolator/_doc`);
               return results;
             })
             .catch((err) => {
@@ -95,6 +95,7 @@ const searchController = new Elysia({ prefix: "/search" })
               const results: Product[] = [];
               for (const hit of res?.hits?.hits) {
                 const product: Product = {
+                  id: hit?._id,
                   name: hit?._source?.name?.input[0],
                   price: hit?._source?.price,
                   imageUrl: hit?._source?.imageUrl,
@@ -107,7 +108,6 @@ const searchController = new Elysia({ prefix: "/search" })
                 };
                 results.push(product);
               }
-              fetch(`${process.env.ELASTIC_URL}/percolator/_doc`);
               return results;
             })
             .catch((err) => {

@@ -62,6 +62,7 @@ export interface Name {
 }
 
 export interface Product {
+  id?: string;
   name: string;
   imageUrl: string;
   brand?: string;

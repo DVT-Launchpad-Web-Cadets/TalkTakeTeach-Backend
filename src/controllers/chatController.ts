@@ -1,7 +1,8 @@
 import { Elysia, t } from "elysia";
-import db from "../dbConnect";
+import { db } from '../dbConnect'
 import { chatNewMessagePOSTRequest } from "../utils/chatBodyPayloads";
 import { WebSocket } from "ws";
+import {  IChatTable } from "../models/database";
 
 const chatController = new Elysia().group(
   "chat",
@@ -11,7 +12,7 @@ const chatController = new Elysia().group(
       .get(
         "/",
         async ({ error }) => {
-          return await db.messageModel.findMany().catch(() => {
+          return await db.selectFrom('tbchat').selectAll().execute().catch(() => {
             return error(500, "Internal Server Error - Database Error");
           });
         },
@@ -28,12 +29,14 @@ const chatController = new Elysia().group(
             `${process.env.WEBSOCKET_URL ?? "ws://localhost:3000/chat"}`
           );
 
-          return await db.messageModel
-            .create({
-              data: body,
-            })
-            .then(() => {
-              if (wss.OPEN) wss.send(JSON.stringify(body));
+          return await db.insertInto('tbchat').values(body).returningAll().execute()
+            .then((result :IChatTable[]) => {
+
+              if (wss.OPEN) {
+                wss.send(JSON.stringify(body));
+                return result
+              }
+
               else throw Error("Message failed to send");
             })
             .catch((er: Error) => {
