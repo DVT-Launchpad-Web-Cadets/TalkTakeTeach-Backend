@@ -1,25 +1,22 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { db } from '../dbConnect'
 import { chatNewMessagePOSTRequest } from "../utils/chatBodyPayloads";
 import { WebSocket } from "ws";
 import {  IChatTable } from "../models/database";
+import { fileLogger,  } from "@bogeychan/elysia-logger";
 
-const chatController = new Elysia().group(
+const chatController = new Elysia().use(fileLogger({file: "./backend.log"})).group(
   "chat",
 
   (app) =>
     app
       .get(
-        "/",
-        async ({ error }) => {
+        "/", 
+        async ({ error} ) => {
+         
           return await db.selectFrom('tbchat').selectAll().execute().catch(() => {
             return error(500, "Internal Server Error - Database Error");
           });
-        },
-        {
-          query: t.Object({
-            alias_exists: t.Optional(t.String()),
-          }),
         }
       )
       .post(
