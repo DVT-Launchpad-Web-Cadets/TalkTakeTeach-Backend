@@ -3,6 +3,7 @@ import chatController from "./controllers/chatController";
 import searchController from "./controllers/searchController";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
+import { fileLogger } from "@bogeychan/elysia-logger";
 
 export interface IUser {
   username: string;
@@ -17,6 +18,7 @@ export interface IMessage {
 const messages: IMessage[] = [];
 let users: String[] = [];
 
+
 const app = new Elysia()
   .use(cors())
   .use(
@@ -28,7 +30,7 @@ const app = new Elysia()
         },
       },
     })
-  )
+  ).use(fileLogger({file: "./backend.log",}))
   .use(chatController)
   .use(searchController)
   .ws("/chat", {
