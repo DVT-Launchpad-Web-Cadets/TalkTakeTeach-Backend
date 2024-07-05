@@ -2,8 +2,49 @@ import { Elysia, t } from "elysia";
 import base64 from "base-64";
 import { Product, Result } from "../models/searchResult";
 import { Percolation } from "../models/percolation";
+import { appendFile } from "node:fs/promises";
 
-const searchController = new Elysia({ prefix: "/search" })
+const searchController = new Elysia({ prefix: "/search" }).onBeforeHandle(async ({request, body}) => {
+  const accessFile = Bun.file('search-access.log')
+  if (await accessFile.exists() == false) {
+    appendFile('search-error.log', `Access to ${request.url} from ${request.headers.get("host")} not logged properly. Cannot find search-access.log file.`)
+  }
+  const logObject = { HTTPRequest: {
+    method: request.method,
+    url: request.url,
+    headers: request.headers,
+    body: body,
+    timestamp: new Date().toISOString(),
+  }};
+  await appendFile('search-access.log', JSON.stringify(logObject) + '\n').catch(() => {
+    console.log('Error writing to access log file')
+  })
+  
+}).onAfterHandle(async ({set, response}) => {
+  if (set.status === 200) {
+  const logObject = { 
+    responsePayload: response,
+    responseStatus: set.status,
+    
+  }
+  await appendFile('search-access.log', JSON.stringify(logObject) + '\n').catch(() => {
+    console.log('Error writing response to access log file')
+  })
+}
+  if (set.status !== 200) {
+    const logObject = { 
+      responsePayload: response ,
+      responseStatus: set.status,
+      
+    }
+    await appendFile('search-error.log', JSON.stringify(logObject) + '\n').catch(() => {
+      console.log('Error writing response to error log file')
+    })
+    
+}
+  
+
+})
   .get(
     "",
     async ({ query: { q } }) => {
