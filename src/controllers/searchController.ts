@@ -17,7 +17,7 @@ const searchController = new Elysia({ prefix: "/search" }).onBeforeHandle(async 
     timestamp: new Date().toISOString(),
   }};
   await appendFile('search-access.log', JSON.stringify(logObject) + '\n').catch(() => {
-    console.log('Error writing to access log file')
+    console.error('Error writing to access log file')
   })
   
 }).onAfterHandle(async ({set, response}) => {
@@ -28,7 +28,7 @@ const searchController = new Elysia({ prefix: "/search" }).onBeforeHandle(async 
     
   }
   await appendFile('search-access.log', JSON.stringify(logObject) + '\n').catch(() => {
-    console.log('Error writing response to access log file')
+    console.error('Error writing response to access log file')
   })
 }
   if (set.status !== 200) {
@@ -38,7 +38,7 @@ const searchController = new Elysia({ prefix: "/search" }).onBeforeHandle(async 
       
     }
     await appendFile('search-error.log', JSON.stringify(logObject) + '\n').catch(() => {
-      console.log('Error writing response to error log file')
+      console.error('Error writing response to error log file')
     })
     
 }

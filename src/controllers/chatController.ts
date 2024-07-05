@@ -12,7 +12,7 @@ const chatController = new Elysia().group(
     app.onBeforeHandle(async ({request, body}) => {
       const accessFile = Bun.file('chat-access.log')
       if (await accessFile.exists() == false) {
-        appendFile('chat-error.log', `Access to ${request.url} from ${request.headers.get("host")} not logged properly. Cannot find caht-access.log file.`)
+        appendFile('chat-error.log', `Access to ${request.url} from ${request.headers.get("host")} not logged properly. Cannot find chat-access.log file.`)
       }
       const logObject = { HTTPRequest: {
         method: request.method,
@@ -22,7 +22,7 @@ const chatController = new Elysia().group(
         timestamp: new Date().toISOString(),
       }};
       await appendFile('chat-access.log', JSON.stringify(logObject) + '\n').catch(() => {
-        console.log('Error writing to access log file')
+        console.error('Error writing to access log file')
       })
       
     }).onAfterHandle(async ({set, response}) => {
@@ -33,7 +33,7 @@ const chatController = new Elysia().group(
         
       }
       await appendFile('chat-access.log', JSON.stringify(logObject) + '\n').catch(() => {
-        console.log('Error writing response to access log file')
+        console.error('Error writing response to access log file')
       })
     }
       if (set.status !== 200) {
@@ -43,7 +43,7 @@ const chatController = new Elysia().group(
           
         }
         await appendFile('chat-error.log', JSON.stringify(logObject) + '\n').catch(() => {
-          console.log('Error writing response to error log file')
+          console.error('Error writing response to error log file')
         })
         
     }
