@@ -17,6 +17,7 @@ export interface IMessage {
 const messages: IMessage[] = [];
 let users: String[] = [];
 
+
 const app = new Elysia()
   .use(cors())
   .use(
