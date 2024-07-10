@@ -4,47 +4,59 @@ import { Product, Result } from "../models/searchResult";
 import { Percolation } from "../models/percolation";
 import { appendFile } from "node:fs/promises";
 
-const searchController = new Elysia({ prefix: "/search" }).onBeforeHandle(async ({request, body}) => {
-  const accessFile = Bun.file('search-access.log')
-  if (await accessFile.exists() == false) {
-    appendFile('search-error.log', `Access to ${request.url} from ${request.headers.get("host")} not logged properly. Cannot find search-access.log file.`)
-  }
-  const logObject = { HTTPRequest: {
-    method: request.method,
-    url: request.url,
-    headers: request.headers,
-    body: body,
-    timestamp: new Date().toISOString(),
-  }};
-  await appendFile('search-access.log', JSON.stringify(logObject) + '\n').catch(() => {
-    console.error('Error writing to access log file')
-  })
-  
-}).onAfterHandle(async ({set, response}) => {
-  if (set.status === 200) {
-  const logObject = { 
-    responsePayload: response,
-    responseStatus: set.status,
-    
-  }
-  await appendFile('search-access.log', JSON.stringify(logObject) + '\n').catch(() => {
-    console.error('Error writing response to access log file')
-  })
-}
-  if (set.status !== 200) {
-    const logObject = { 
-      responsePayload: response ,
-      responseStatus: set.status,
-      
+const searchController = new Elysia({ prefix: "/search" })
+  .onBeforeHandle(async ({ request, body }) => {
+    const accessFile = Bun.file("search-access.log");
+    if ((await accessFile.exists()) == false) {
+      appendFile(
+        "search-error.log",
+        `Access to ${request.url} from ${request.headers.get(
+          "host"
+        )} not logged properly. Cannot find search-access.log file.`
+      );
     }
-    await appendFile('search-error.log', JSON.stringify(logObject) + '\n').catch(() => {
-      console.error('Error writing response to error log file')
-    })
-    
-}
-  
-
-})
+    const logObject = {
+      HTTPRequest: {
+        method: request.method,
+        url: request.url,
+        headers: request.headers,
+        body: body,
+        timestamp: new Date().toISOString(),
+      },
+    };
+    await appendFile(
+      "search-access.log",
+      JSON.stringify(logObject) + "\n"
+    ).catch(() => {
+      console.error("Error writing to access log file");
+    });
+  })
+  .onAfterHandle(async ({ set, response }) => {
+    if (set.status === 200) {
+      const logObject = {
+        responsePayload: response,
+        responseStatus: set.status,
+      };
+      await appendFile(
+        "search-access.log",
+        JSON.stringify(logObject) + "\n"
+      ).catch(() => {
+        console.error("Error writing response to access log file");
+      });
+    }
+    if (set.status !== 200) {
+      const logObject = {
+        responsePayload: response,
+        responseStatus: set.status,
+      };
+      await appendFile(
+        "search-error.log",
+        JSON.stringify(logObject) + "\n"
+      ).catch(() => {
+        console.error("Error writing response to error log file");
+      });
+    }
+  })
   .get(
     "",
     async ({ query: { q } }) => {
@@ -67,7 +79,7 @@ const searchController = new Elysia({ prefix: "/search" }).onBeforeHandle(async 
           return fetch(
             `${
               process.env.ELASTIC_URL ?? "https://localhost:9200"
-            }/_search?pretty`,
+            }/products/_search?pretty`,
             {
               method: "post",
               headers: {
@@ -85,6 +97,10 @@ const searchController = new Elysia({ prefix: "/search" }).onBeforeHandle(async 
             .then((resp) => resp.json())
             .then((res: Result) => {
               const results: Product[] = [];
+
+              if (!res?.suggest?.["product-suggest-fuzzy"]?.[0]?.options)
+                return [];
+
               for (const option of res?.suggest?.["product-suggest-fuzzy"]?.[0]
                 ?.options) {
                 const product = {
@@ -116,7 +132,9 @@ const searchController = new Elysia({ prefix: "/search" }).onBeforeHandle(async 
             },
           };
           return fetch(
-            `${process.env.ELASTIC_URL ?? "https://localhost:9200"}/_search`,
+            `${
+              process.env.ELASTIC_URL ?? "https://localhost:9200"
+            }/products/_search`,
             {
               method: "post",
               headers: {
@@ -134,6 +152,7 @@ const searchController = new Elysia({ prefix: "/search" }).onBeforeHandle(async 
             .then((resp) => resp.json())
             .then((res: Percolation) => {
               const results: Product[] = [];
+              if (!res?.hits?.hits) return [];
               for (const hit of res?.hits?.hits) {
                 const product: Product = {
                   id: hit?._id,
