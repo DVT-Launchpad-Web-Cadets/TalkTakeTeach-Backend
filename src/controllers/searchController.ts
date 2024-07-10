@@ -1,0 +1,200 @@
+import { Elysia, t } from "elysia";
+import base64 from "base-64";
+import { Product, Result } from "../models/searchResult";
+import { Percolation } from "../models/percolation";
+import { appendFile } from "node:fs/promises";
+
+const searchController = new Elysia({ prefix: "/search" })
+  .onBeforeHandle(async ({ request, body }) => {
+    const accessFile = Bun.file("search-access.log");
+    if ((await accessFile.exists()) == false) {
+      appendFile(
+        "search-error.log",
+        `Access to ${request.url} from ${request.headers.get(
+          "host"
+        )} not logged properly. Cannot find search-access.log file.`
+      );
+    }
+    const logObject = {
+      HTTPRequest: {
+        method: request.method,
+        url: request.url,
+        headers: request.headers,
+        body: body,
+        timestamp: new Date().toISOString(),
+      },
+    };
+    await appendFile(
+      "search-access.log",
+      JSON.stringify(logObject) + "\n"
+    ).catch(() => {
+      console.error("Error writing to access log file");
+    });
+  })
+  .onAfterHandle(async ({ set, response }) => {
+    if (set.status === 200) {
+      const logObject = {
+        responsePayload: response,
+        responseStatus: set.status,
+      };
+      await appendFile(
+        "search-access.log",
+        JSON.stringify(logObject) + "\n"
+      ).catch(() => {
+        console.error("Error writing response to access log file");
+      });
+    }
+    if (set.status !== 200) {
+      const logObject = {
+        responsePayload: response,
+        responseStatus: set.status,
+      };
+      await appendFile(
+        "search-error.log",
+        JSON.stringify(logObject) + "\n"
+      ).catch(() => {
+        console.error("Error writing response to error log file");
+      });
+    }
+  })
+  .get(
+    "",
+    async ({ query: { q } }) => {
+      try {
+        if (q.length) {
+          const payload = {
+            suggest: {
+              "product-suggest-fuzzy": {
+                prefix: q,
+                completion: {
+                  field: "name",
+                  fuzzy: {
+                    fuzziness: "AUTO",
+                  },
+                },
+              },
+            },
+          };
+
+          return fetch(
+            `${
+              process.env.ELASTIC_URL ?? "https://localhost:9200"
+            }/products/_search?pretty`,
+            {
+              method: "post",
+              headers: {
+                Authorization: `Basic ${base64.encode(
+                  `elastic:${process.env.ELASTIC_PASSWORD}`
+                )}`,
+                "Content-Type": "application/json",
+              },
+              tls: {
+                rejectUnauthorized: false,
+              },
+              body: JSON.stringify(payload),
+            }
+          )
+            .then((resp) => resp.json())
+            .then((res: Result) => {
+              const results: Product[] = [];
+
+              if (!res?.suggest?.["product-suggest-fuzzy"]?.[0]?.options)
+                return [];
+
+              for (const option of res?.suggest?.["product-suggest-fuzzy"]?.[0]
+                ?.options) {
+                const product = {
+                  id: option?._id,
+                  name: option?._source?.name?.input[0],
+                  price: option?._source?.price,
+                  imageUrl: option?._source?.imageUrl,
+                  productLink: option?._source?.productLink,
+                  brand: option?._source?.brand,
+                  brandLink: option?._source?.brandLink,
+                  numberOfReviews: option?._source?.numberOfReviews,
+                  rating: option?._source?.rating,
+                  salePrice: option?._source?.salePrice,
+                };
+                results.push(product);
+              }
+              return results;
+            })
+            .catch((err) => {
+              console.error(err);
+
+              throw new Error("Internal Server Error");
+            });
+        } else {
+          const payload = {
+            size: 10,
+            query: {
+              match_all: {},
+            },
+          };
+          return fetch(
+            `${
+              process.env.ELASTIC_URL ?? "https://localhost:9200"
+            }/products/_search`,
+            {
+              method: "post",
+              headers: {
+                Authorization: `Basic ${base64.encode(
+                  `elastic:${process.env.ELASTIC_PASSWORD}`
+                )}`,
+                "Content-Type": "application/json",
+              },
+              tls: {
+                rejectUnauthorized: false,
+              },
+              body: JSON.stringify(payload),
+            }
+          )
+            .then((resp) => resp.json())
+            .then((res: Percolation) => {
+              const results: Product[] = [];
+              if (!res?.hits?.hits) return [];
+              for (const hit of res?.hits?.hits) {
+                const product: Product = {
+                  id: hit?._id,
+                  name: hit?._source?.name?.input[0],
+                  price: hit?._source?.price,
+                  imageUrl: hit?._source?.imageUrl,
+                  productLink: hit?._source?.productLink,
+                  brand: hit?._source?.brand,
+                  brandLink: hit?._source?.brandLink,
+                  numberOfReviews: hit?._source?.numberOfReviews,
+                  rating: hit?._source?.rating,
+                  salePrice: hit?._source?.salePrice,
+                };
+                results.push(product);
+              }
+              return results;
+            })
+            .catch((err) => {
+              throw new Error("Internal Server Error: " + err.message);
+            });
+        }
+      } catch (err) {
+        throw new Error("Internal Server Error");
+      }
+    },
+    {
+      query: t.Object({
+        q: t.String(),
+      }),
+    }
+  )
+  .onError(({ code, error }) => {
+    switch (code) {
+      case "VALIDATION":
+        return `Invalid query: ${
+          error.validator.Errors(error.value).First().message
+        }`;
+      case "INTERNAL_SERVER_ERROR":
+        return error.message;
+      case "NOT_FOUND":
+        return "Request not found";
+    }
+  });
+
+export default searchController;
